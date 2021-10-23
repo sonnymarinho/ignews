@@ -4,10 +4,9 @@ import { stripe } from "../../../services/stripe.server";
 
 export default async function saveSubscription(
   subscriptionId: string,
-  customerId: string
+  customerId: string,
+  createAction = false
 ) {
-  console.log("save process started");
-
   const userRef = await fauna.query(
     q.Select(
       "ref",
@@ -15,13 +14,9 @@ export default async function saveSubscription(
     )
   );
 
-  console.log("save process started 1");
-
   const subscription = await stripe.subscriptions.retrieve(subscriptionId);
 
   const [product] = subscription.items.data;
-
-  console.log("save process started 3");
 
   const subscriptionData = {
     id: subscription.id,
@@ -30,11 +25,19 @@ export default async function saveSubscription(
     price_id: product.price.id,
   };
 
-  console.log("save process started 3");
-
-  await fauna.query(
-    q.Create(q.Collection("subscriptions"), { data: subscriptionData })
-  );
-
-  console.log("save process finished");
+  if (createAction) {
+    await fauna.query(
+      q.Create(q.Collection("subscriptions"), { data: subscriptionData })
+    );
+  } else {
+    await fauna.query(
+      q.Replace(
+        q.Select(
+          "ref",
+          q.Get(q.Match(q.Index("subscription_by_id"), subscriptionId))
+        ),
+        { data: subscriptionData }
+      )
+    );
+  }
 }

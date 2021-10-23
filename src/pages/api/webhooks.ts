@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { Readable } from "stream";
 import Stripe from "stripe";
 import { stripe } from "../../services/stripe.server";
+import STRIPE, { STRIPE_WEBHOOK_ACTIONS } from "./_config/stripe";
 import saveSubscription from "./_lib/manage-subscription";
 
 export const config = {
@@ -10,7 +11,11 @@ export const config = {
   },
 };
 
-const relevantEvents = new Set(["checkout.session.completed"]);
+const relevantEvents = new Set([
+  STRIPE.WEB_HOOKS.CHECKOUT_SESSION_COMPLETED,
+  STRIPE.WEB_HOOKS.SUBSCRIPTION_UPDATED,
+  STRIPE.WEB_HOOKS.SUBSCRIPTION_DELETED,
+]);
 
 async function buffer(readable: Readable) {
   const chunks = [];
@@ -42,18 +47,30 @@ export default async function (req: NextApiRequest, res: NextApiResponse) {
 
     const { type } = event;
 
-    if (relevantEvents.has(type)) {
+    if (relevantEvents.has(type as STRIPE_WEBHOOK_ACTIONS)) {
       try {
         switch (type) {
-          case "checkout.session.completed":
-            console.log("checkout session called");
+          case STRIPE.WEB_HOOKS.CHECKOUT_SESSION_COMPLETED:
             const checkoutSession = event.data
               .object as Stripe.Checkout.Session;
 
             await saveSubscription(
               checkoutSession.subscription.toString(),
-              checkoutSession.customer.toString()
+              checkoutSession.customer.toString(),
+              true
             );
+            break;
+
+          case STRIPE.WEB_HOOKS.SUBSCRIPTION_UPDATED:
+          case STRIPE.WEB_HOOKS.SUBSCRIPTION_DELETED:
+            const subscription = event.data.object as Stripe.Subscription;
+
+            await saveSubscription(
+              subscription.id,
+              subscription.customer.toString(),
+              false
+            );
+
             break;
 
           default:
