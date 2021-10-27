@@ -1,3 +1,4 @@
+import Link from "next/link";
 import Prismic from "@prismicio/client";
 import { GetStaticProps } from "next";
 import Head from "next/head";
@@ -5,16 +6,12 @@ import React from "react";
 import { getPrismicClient } from "../../services/prismic";
 import { formatPost } from "../_utils/posts";
 import styles from "./styles.module.scss";
+import { ROUTES } from "../../config/routes";
+import { Post as PostData } from "../../types/Post";
 
-export type Post = {
-  slug: string;
-  title: string;
-  excerpt: string;
-  updatedAt: string;
-};
-
+type PostType = Omit<PostData, "content">;
 interface PostsProps {
-  posts: Array<Post>;
+  posts: Array<PostType>;
 }
 
 export default function Posts({ posts }: PostsProps) {
@@ -27,15 +24,27 @@ export default function Posts({ posts }: PostsProps) {
       <main className={styles.container}>
         <div className={styles.postList}>
           {posts.map((post) => (
-            <a href="#" key={post.slug}>
-              <time>{post.updatedAt}</time>
-              <strong>{post.title}</strong>
-              <p>{post.excerpt}</p>
-            </a>
+            <Post post={post} />
           ))}
         </div>
       </main>
     </>
+  );
+}
+
+interface PostProps {
+  post: PostType;
+}
+
+function Post({ post }: PostProps) {
+  return (
+    <Link href={`/${ROUTES.POSTS}/${post.slug}`}>
+      <a href="#" key={post.slug}>
+        <time>{post.updatedAt}</time>
+        <strong>{post.title}</strong>
+        <p>{post.excerpt}</p>
+      </a>
+    </Link>
   );
 }
 
@@ -50,7 +59,7 @@ export const getStaticProps: GetStaticProps = async () => {
     }
   );
 
-  const posts = results.map((post) => formatPost(post));
+  const posts = results.map((post) => formatPost({ post }));
 
   return {
     props: { posts },
