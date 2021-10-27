@@ -1,3 +1,5 @@
+import { ROUTES } from "../../config/routes";
+import { ActiveLink } from "../ActiveLink";
 import { SignInButton } from "../SignInButton";
 import styles from "./styles.module.scss";
 
@@ -7,10 +9,20 @@ export function Header() {
       <div className={styles.headerContent}>
         <img src="/images/logo.svg" alt="ignews" />
         <nav>
-          <a className={styles.active} href="#">
-            Home
-          </a>
-          <a href="#">Posts</a>
+          <ActiveLink
+            activeClassName={styles.active}
+            href={ROUTES.HOME}
+            prefetch
+          >
+            <a href="#">Home</a>
+          </ActiveLink>
+          <ActiveLink
+            activeClassName={styles.active}
+            href={ROUTES.POSTS}
+            prefetch
+          >
+            <a>Posts</a>
+          </ActiveLink>
         </nav>
         <SignInButton />
       </div>
