@@ -1,13 +1,10 @@
-import Head from "next/head";
-
 import { GetServerSideProps } from "next";
 import { getSession } from "next-auth/client";
+import Head from "next/head";
 import { getPrismicClient } from "../../services/prismic";
 import { Post } from "../../types/Post";
 import { formatPost } from "../_utils/posts";
-
 import styles from "./post.module.scss";
-import hljs from "highlight.js";
 
 interface PostProps {
   post: Omit<Post, "excerpt">;
@@ -43,7 +40,14 @@ export const getServerSideProps: GetServerSideProps = async ({
 }) => {
   const session = await getSession({ req });
 
-  //TODO validate user session
+  if (!session.activeSubscription) {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
+  }
 
   const { slug } = params;
 
