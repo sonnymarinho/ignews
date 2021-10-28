@@ -5,8 +5,10 @@ interface FormatPostProps {
   post: any;
 }
 
-function getContentAsHTMLpreview(content: string, preview: boolean) {
-  return preview ? "" : RichText.asHtml(content);
+function getContentAsHTMLpreview(content: Array<string>, preview: boolean) {
+  return preview
+    ? RichText.asHtml(content.splice(0, 3))
+    : RichText.asHtml(content);
 }
 
 export function formatPost({ preview = true, post }: FormatPostProps): Post {
