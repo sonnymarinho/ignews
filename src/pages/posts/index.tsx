@@ -4,7 +4,7 @@ import { GetStaticProps } from "next";
 import Head from "next/head";
 import React from "react";
 import { getPrismicClient } from "../../services/prismic";
-import { formatPost } from "../_utils/posts";
+import { formatPost } from "../../_utils/posts";
 import styles from "./styles.module.scss";
 import { ROUTES } from "../../config/routes";
 import { Post as PostData } from "../../types/Post";

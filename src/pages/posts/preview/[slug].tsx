@@ -2,7 +2,7 @@ import { GetStaticProps } from "next";
 import Head from "next/head";
 import { getPrismicClient } from "../../../services/prismic";
 import { Post } from "../../../types/Post";
-import { formatPost } from "../../_utils/posts";
+import { formatPost } from "../../../_utils/posts";
 import styles from "../post.module.scss";
 import Link from "next/link";
 import { useSession } from "next-auth/client";

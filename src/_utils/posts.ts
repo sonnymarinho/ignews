@@ -1,5 +1,5 @@
 import { RichText } from "prismic-dom";
-import { Post } from "../../types/Post";
+import { Post } from "../types/Post";
 interface FormatPostProps {
   preview?: boolean;
   post: any;
